@@ -1,13 +1,18 @@
 import streamlit as st
-import speech_recognition as sr
-import pyttsx3
 import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import threading
+import os
 
-# Initialize TTS engine
-engine = pyttsx3.init()
+# Check if running on Streamlit Cloud
+ON_STREAMLIT_CLOUD = "STREAMLIT_SERVER" in os.environ
+
+# Import voice modules only if running locally
+if not ON_STREAMLIT_CLOUD:
+    import speech_recognition as sr
+    import pyttsx3
+    engine = pyttsx3.init()
 
 # Download necessary NLTK data
 nltk.download('punkt')
@@ -37,7 +42,7 @@ def chatbot_response(user_input):
     else:
         return sent_tokens[idx]
 
-# Speech to text function
+# Speech to text function (local only)
 def speech_to_text():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
@@ -54,9 +59,10 @@ def speech_to_text():
             st.error("Could not request results from Google Speech Recognition service")
             return ""
 
-
-# New version to fix RuntimeError in Streamlit
+# Speak text function (local only)
 def speak_text(text):
+    if ON_STREAMLIT_CLOUD:
+        return  # Skip speaking on cloud
     def run_speech():
         engine.say(text)
         engine.runAndWait()
@@ -75,8 +81,11 @@ user_input = ""
 if input_mode == "Text":
     user_input = st.text_input("Type your message:")
 else:
-    if st.button("Speak"):
-        user_input = speech_to_text()
+    if ON_STREAMLIT_CLOUD:
+        st.warning("Speech input is disabled on Streamlit Cloud. Use Text input.")
+    else:
+        if st.button("Speak"):
+            user_input = speech_to_text()
 
 # Generate response and update history
 if user_input:
