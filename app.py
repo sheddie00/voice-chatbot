@@ -5,7 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import threading
 import os
 
-# Detect Streamlit Cloud
+# Detect if running on Streamlit Cloud
 ON_STREAMLIT_CLOUD = "STREAMLIT_SERVER" in os.environ
 
 # Try importing voice modules; disable if unavailable
@@ -19,9 +19,17 @@ if not ON_STREAMLIT_CLOUD:
     except ImportError:
         VOICE_AVAILABLE = False
 
-# Download NLTK data
-nltk.download('punkt')
-nltk.download('wordnet')
+# NLTK data directory inside project
+nltk_data_dir = os.path.join(os.getcwd(), "nltk_data")
+if not os.path.exists(nltk_data_dir):
+    os.makedirs(nltk_data_dir)
+
+# Download required NLTK data
+nltk.download('punkt', download_dir=nltk_data_dir)
+nltk.download('wordnet', download_dir=nltk_data_dir)
+
+# Add to NLTK data path
+nltk.data.path.append(nltk_data_dir)
 
 # Load chatbot data
 with open('chat_data.txt', 'r', encoding='utf8') as file:
@@ -30,7 +38,7 @@ with open('chat_data.txt', 'r', encoding='utf8') as file:
 sent_tokens = nltk.sent_tokenize(raw_text)
 word_tokens = nltk.word_tokenize(raw_text)
 
-# Chatbot response
+# Chatbot response function
 def chatbot_response(user_input):
     sent_tokens.append(user_input)
     vectorizer = TfidfVectorizer(tokenizer=nltk.word_tokenize, stop_words='english')
@@ -45,7 +53,7 @@ def chatbot_response(user_input):
         return "I am sorry, I didn't understand that."
     return sent_tokens[idx]
 
-# Speech to text (local only)
+# Speech-to-text function (local only)
 def speech_to_text():
     if not VOICE_AVAILABLE:
         st.warning("Voice input not available.")
@@ -74,7 +82,7 @@ def speak_text(text):
         engine.runAndWait()
     threading.Thread(target=run_speech).start()
 
-# Session state
+# Initialize session state for conversation history
 if "history" not in st.session_state:
     st.session_state.history = []
 
@@ -100,7 +108,7 @@ if user_input:
     st.session_state.history.append(("Bot", response))
     speak_text(response)
 
-# Display history
+# Display conversation history
 st.subheader("Conversation")
 for sender, message in st.session_state.history:
     if sender == "You":
