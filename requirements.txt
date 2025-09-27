@@ -1,0 +1,6 @@
+streamlit
+SpeechRecognition
+nltk
+scikit-learn
+pyttsx3
+pyaudio

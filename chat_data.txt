@@ -1,0 +1,12 @@
+Hello! How can I help you today?
+Hi there! Nice to meet you.
+I am a chatbot that can talk with you.
+What is your name?
+My name is ChatBot.
+I can answer simple questions and chat with you.
+How are you feeling today?
+I am just a bot, but I am here to help you.
+Tell me a joke.
+Why did the computer go to the doctor? Because it caught a virus!
+Goodbye! Have a great day.
+See you later!
